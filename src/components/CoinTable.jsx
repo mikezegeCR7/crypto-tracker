@@ -11,8 +11,8 @@ function CoinTable({ coins, favorites, onToggleFavorite, currencySymbol }) {
           <th>Symbol</th>
           <th>Price</th>
           <th>24h %</th>
-          <th>Market Cap</th>
-          <th>Volume</th>
+          <th className="hide-mobile">Market Cap</th>
+          <th className="hide-mobile">Volume</th>
         </tr>
       </thead>
       <tbody>

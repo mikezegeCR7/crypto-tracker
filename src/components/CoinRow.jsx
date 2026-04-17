@@ -26,18 +26,19 @@ function CoinRow({ coin, isFavorite, onToggleFavorite, currencySymbol }) {
           <div className="coin-name">{coin.name}</div>
           <div className="coin-symbol">{coin.symbol.toUpperCase()}</div>
         </td>
+        <td>{coin.symbol.toUpperCase()}</td>
         <td style={{ fontWeight: 600 }}>
           {currencySymbol}{coin.current_price.toLocaleString()}
         </td>
         <td className={isPositive ? "positive" : "negative"}>
           {isPositive ? "▲" : "▼"} {Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
         </td>
-        <td>{currencySymbol}{coin.market_cap.toLocaleString()}</td>
-        <td>{currencySymbol}{coin.total_volume.toLocaleString()}</td>
+        <td className="hide-mobile">{currencySymbol}{coin.market_cap.toLocaleString()}</td>
+        <td className="hide-mobile">{currencySymbol}{coin.total_volume.toLocaleString()}</td>
       </tr>
       {showChart && coin.sparkline_in_7d && (
         <tr className="chart-row">
-          <td colSpan={7}>
+          <td colSpan={8}>
             <p className="chart-label">📈 {coin.name} — 7 Day Price Chart</p>
             <CoinChart
               sparkline={coin.sparkline_in_7d.price}

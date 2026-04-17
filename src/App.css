@@ -631,3 +631,141 @@ td img {
   background: var(--negative);
   color: #fff;
 }
+
+/* HIDE ON MOBILE */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none;
+  }
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+  .app {
+    padding: 0 12px 48px;
+  }
+
+  /* HEADER */
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .user-email {
+    display: none;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px 14px;
+  }
+
+  .stat-card h3 {
+    font-size: 1rem;
+  }
+
+  /* CONTROLS */
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .currency-group {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .currency-btn {
+    flex: 1;
+    text-align: center;
+  }
+
+  .action-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* TABLE */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  th, td {
+    padding: 10px 12px;
+    font-size: 0.78rem;
+  }
+
+  .coin-name {
+    font-size: 0.82rem;
+  }
+
+  .coin-symbol {
+    font-size: 0.7rem;
+  }
+
+  /* NEWS */
+  .news-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .news-title {
+    font-size: 1rem;
+  }
+
+  /* AUTH */
+  .auth-card {
+    padding: 28px 20px;
+  }
+
+  .auth-title {
+    font-size: 1.2rem;
+  }
+
+  /* CHART */
+  .chart-row td {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-left h1 {
+    font-size: 1.1rem;
+  }
+
+  .stat-card h3 {
+    font-size: 0.95rem;
+  }
+
+  .theme-toggle {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+
+  .logout-btn {
+    font-size: 0.72rem;
+    padding: 5px 10px;
+  }
+}
