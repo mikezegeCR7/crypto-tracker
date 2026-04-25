@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+
+const cache = {};
 
 function CoinDetail() {
   const { id } = useParams();
@@ -11,33 +13,79 @@ function CoinDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [days, setDays] = useState(7);
+  const retryTimeout = useRef(null);
 
   useEffect(() => {
-    const fetchCoin = async () => {
+    const fetchCoin = async (retryCount = 0) => {
       try {
         setLoading(true);
+        setError(null);
+
+        const cacheKey = `${id}-${days}`;
+
+        if (cache[cacheKey]) {
+          setCoin(cache[cacheKey].coin);
+          setChartData(cache[cacheKey].chartData);
+          setLoading(false);
+          return;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         const [coinRes, chartRes] = await Promise.all([
           axios.get(`https://api.coingecko.com/api/v3/coins/${id}?localization=false&tickers=false&community_data=false&developer_data=false`),
           axios.get(`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=${days}`)
         ]);
-        setCoin(coinRes.data);
+
         const formatted = chartRes.data.prices.map(([timestamp, price]) => ({
           date: new Date(timestamp).toLocaleDateString(),
           price: parseFloat(price.toFixed(2))
         }));
+
+        cache[cacheKey] = { coin: coinRes.data, chartData: formatted };
+
+        setCoin(coinRes.data);
         setChartData(formatted);
         setError(null);
       } catch (err) {
-        setError("Failed to load coin details. Try again later.");
+        if (retryCount < 3) {
+          retryTimeout.current = setTimeout(() => {
+            fetchCoin(retryCount + 1);
+          }, 3000);
+        } else {
+          setError("Failed to load coin details. Please wait a moment and try again.");
+        }
       } finally {
         setLoading(false);
       }
     };
+
     fetchCoin();
+
+    return () => {
+      if (retryTimeout.current) clearTimeout(retryTimeout.current);
+    };
   }, [id, days]);
 
-  if (loading) return <div className="status-message">⏳ Loading coin details...</div>;
-  if (error) return <div className="status-message" style={{ color: "var(--negative)" }}>{error}</div>;
+  if (loading) return (
+    <div className="status-message">
+      <p>⏳ Loading coin details...</p>
+      <p style={{ fontSize: "0.8rem", marginTop: "8px", color: "var(--text-secondary)" }}>This may take a few seconds</p>
+    </div>
+  );
+
+  if (error) return (
+    <div className="status-message">
+      <p style={{ color: "var(--negative)", marginBottom: "16px" }}>{error}</p>
+      <button className="back-btn" onClick={() => { setError(null); setLoading(true); window.location.reload(); }}>
+        🔄 Try Again
+      </button>
+      <button className="back-btn" style={{ marginLeft: "10px" }} onClick={() => navigate(-1)}>
+        ← Go Back
+      </button>
+    </div>
+  );
+
   if (!coin) return null;
 
   const isPositive = coin.market_data.price_change_percentage_24h >= 0;
@@ -45,12 +93,10 @@ function CoinDetail() {
   return (
     <div className="coin-detail-wrapper">
 
-      {/* BACK BUTTON */}
       <button className="back-btn" onClick={() => navigate(-1)}>
         ← Back
       </button>
 
-      {/* COIN HEADER */}
       <div className="coin-detail-header">
         <img src={coin.image.large} alt={coin.name} width={56} height={56} />
         <div>
@@ -69,7 +115,6 @@ function CoinDetail() {
         </div>
       </div>
 
-      {/* STATS GRID */}
       <div className="coin-stats-grid">
         <div className="coin-stat-card">
           <p>Market Cap</p>
@@ -97,7 +142,6 @@ function CoinDetail() {
         </div>
       </div>
 
-      {/* CHART */}
       <div className="coin-chart-section">
         <div className="coin-chart-header">
           <h3>Price Chart</h3>
@@ -126,7 +170,6 @@ function CoinDetail() {
         </ResponsiveContainer>
       </div>
 
-      {/* DESCRIPTION */}
       {coin.description.en && (
         <div className="coin-description">
           <h3>About {coin.name}</h3>
@@ -134,7 +177,6 @@ function CoinDetail() {
         </div>
       )}
 
-      {/* LINKS */}
       <div className="coin-links">
         {coin.links.homepage[0] && (
           <a href={coin.links.homepage[0]} target="_blank" rel="noreferrer" className="coin-link-btn">
