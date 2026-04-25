@@ -1,6 +1,6 @@
 import CoinRow from "./CoinRow";
 
-function CoinTable({ coins, favorites, onToggleFavorite, currencySymbol }) {
+function CoinTable({ coins, favorites, onToggleFavorite, currencySymbol, onCoinClick }) {
   return (
     <table>
       <thead>
@@ -23,6 +23,7 @@ function CoinTable({ coins, favorites, onToggleFavorite, currencySymbol }) {
             isFavorite={favorites.includes(coin.id)}
             onToggleFavorite={onToggleFavorite}
             currencySymbol={currencySymbol}
+            onCoinClick={onCoinClick}
           />
         ))}
       </tbody>

@@ -1,13 +1,11 @@
-import { useState } from "react";
 import CoinChart from "./CoinChart";
 
-function CoinRow({ coin, isFavorite, onToggleFavorite, currencySymbol }) {
+function CoinRow({ coin, isFavorite, onToggleFavorite, currencySymbol, onCoinClick }) {
   const isPositive = coin.price_change_percentage_24h >= 0;
-  const [showChart, setShowChart] = useState(false);
 
   return (
     <>
-      <tr onClick={() => setShowChart(!showChart)} style={{ cursor: "pointer" }}>
+      <tr onClick={() => onCoinClick(coin.id)} style={{ cursor: "pointer" }}>
         <td>
           <span
             className="star"
@@ -36,17 +34,6 @@ function CoinRow({ coin, isFavorite, onToggleFavorite, currencySymbol }) {
         <td className="hide-mobile">{currencySymbol}{coin.market_cap.toLocaleString()}</td>
         <td className="hide-mobile">{currencySymbol}{coin.total_volume.toLocaleString()}</td>
       </tr>
-      {showChart && coin.sparkline_in_7d && (
-        <tr className="chart-row">
-          <td colSpan={8}>
-            <p className="chart-label">📈 {coin.name} — 7 Day Price Chart</p>
-            <CoinChart
-              sparkline={coin.sparkline_in_7d.price}
-              isPositive={isPositive}
-            />
-          </td>
-        </tr>
-      )}
     </>
   );
 }

@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { auth } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useCrypto } from "./useCrypto";
 import CoinTable from "./components/CoinTable";
 import CryptoNews from "./components/CryptoNews";
+import CoinDetail from "./CoinDetail";
 import Login from "./Login";
 import "./App.css";
 
 const CURRENCIES = ["usd", "eur", "gbp"];
 const CURRENCY_SYMBOLS = { usd: "$", eur: "€", gbp: "£" };
 
-function App() {
-  const [user, setUser] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
+function Dashboard({ user, handleLogout }) {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [darkMode, setDarkMode] = useState(true);
   const [favorites, setFavorites] = useState([]);
@@ -20,19 +21,6 @@ function App() {
   const [currency, setCurrency] = useState("usd");
 
   const { coins, loading, error, refetch } = useCrypto(currency);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setAuthLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    setUser(null);
-  };
 
   const toggleFavorite = (id) => {
     setFavorites((prev) =>
@@ -47,9 +35,6 @@ function App() {
   const totalMarketCap = coins.reduce((acc, coin) => acc + coin.market_cap, 0);
   const totalVolume = coins.reduce((acc, coin) => acc + coin.total_volume, 0);
   const symbol = CURRENCY_SYMBOLS[currency];
-
-  if (authLoading) return <div className="status-message">⏳ Loading...</div>;
-  if (!user) return <Login onLogin={() => {}} />;
 
   if (loading) return <div className="status-message">⏳ Fetching market data...</div>;
   if (error) return <div className="status-message" style={{ color: "var(--negative)" }}>{error}</div>;
@@ -128,11 +113,40 @@ function App() {
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
           currencySymbol={symbol}
+          onCoinClick={(id) => navigate(`/coin/${id}`)}
         />
       </div>
 
       <CryptoNews />
     </div>
+  );
+}
+
+function App() {
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    setUser(null);
+  };
+
+  if (authLoading) return <div className="status-message">⏳ Loading...</div>;
+  if (!user) return <Login onLogin={() => {}} />;
+
+  return (
+    <Routes>
+      <Route path="/" element={<Dashboard user={user} handleLogout={handleLogout} />} />
+      <Route path="/coin/:id" element={<CoinDetail />} />
+    </Routes>
   );
 }
 
